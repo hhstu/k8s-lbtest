@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: lb-rr
+  name: lb-rr
+spec:
+  selector:
+    matchLabels:
+      app : lb-rr
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app : lb-rr
+    spec:
+      containers:
+        - name: lb-rr
+          image: lb-test:v1-arm
+          command:
+            - ./main
+          env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: TZ
+              value: Asia/Shanghai
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: lb-rr
+spec:
+  selector:
+    app: lb-rr
+  ports:
+    - port: 80
+
+---
+
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    ginx.ingress.kubernetes.io/upstream-hash-by: "round_robin"
+  name: lb-rr
+spec:
+  rules:
+     - http:
+        paths:
+          - backend:
+              serviceName: lb-rr
+              servicePort: 80
+            path: /lb-rr(/|$)(.*)
+       host: lc.com

@@ -1,0 +1,108 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: lb-wrr-a
+  name: lb-wrr-a
+spec:
+  selector:
+    matchLabels:
+      app : lb-wrr-a
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app : lb-wrr-a
+    spec:
+      containers:
+        - name: lb-wrr
+          image: lb-test:v1-arm
+          command:
+            - ./main
+          env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: TZ
+              value: Asia/Shanghai
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: lb-wrr-b
+  name: lb-wrr-b
+spec:
+  selector:
+    matchLabels:
+      app : lb-wrr-b
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app : lb-wrr-b
+    spec:
+      containers:
+        - name: lb-wrr
+          image: lb-test:v1-arm
+          command:
+            - ./main
+          env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: TZ
+              value: Asia/Shanghai
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: lb-wrr-a
+spec:
+  selector:
+    app: lb-wrr-a
+  ports:
+    - port: 80
+
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: lb-wrr-b
+spec:
+  selector:
+    app: lb-wrr-b
+  ports:
+    - port: 80
+
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/canary: "true"
+    nginx.ingress.kubernetes.io/canary-weight: "20"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+  name: lb-wrr
+spec:
+  rules:
+    - http:
+        paths:
+          - backend:
+              serviceName: lb-wrr-b
+              servicePort: 80
+            path: /lb-wrr(/|$)(.*)
+        host: lc.com
+    - http:
+        paths:
+          - backend:
+              serviceName: lb-wrr-a
+              servicePort: 80
+            path: /lb-wrr(/|$)(.*)
+        host: lc.com
