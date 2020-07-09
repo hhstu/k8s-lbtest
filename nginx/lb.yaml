@@ -98,3 +98,22 @@ data:
 
       include /etc/nginx/conf.d/*.conf;
     }
+
+
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/connection-proxy-header: keep-alive
+  name: nginx
+  namespace: default
+spec:
+  rules:
+    - host: lb.com
+      http:
+        paths:
+          - backend:
+              serviceName: nginx
+              servicePort: 80
+            path: /
