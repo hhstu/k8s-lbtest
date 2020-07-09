@@ -57,4 +57,4 @@ spec:
               serviceName: lb-rr
               servicePort: 80
             path: /lb-rr(/|$)(.*)
-       host: lc.com
+       host: nginx.com

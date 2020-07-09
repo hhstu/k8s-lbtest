@@ -98,11 +98,11 @@ spec:
               serviceName: lb-wrr-b
               servicePort: 80
             path: /lb-wrr(/|$)(.*)
-        host: lc.com
+        host: nginx.com
     - http:
         paths:
           - backend:
               serviceName: lb-wrr-a
               servicePort: 80
             path: /lb-wrr(/|$)(.*)
-        host: lc.com
+        host: nginx.com

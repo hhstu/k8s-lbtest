@@ -1,5 +1,5 @@
-FROM centos:7
+FROM ubuntu:18.04
 ADD ./main  /main
 ADD ./index.html /index.html
-CMD chmod +x  /main
+CMD /main
 

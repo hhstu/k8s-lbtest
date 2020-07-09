@@ -57,4 +57,4 @@ spec:
               serviceName: lb-iphash
               servicePort: 80
             path: /lb-iphash(/|$)(.*)
-       host: lc.com
+       host: nginx.com
